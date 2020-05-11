@@ -32,14 +32,24 @@
             (cond
               [(for/or ([i (list + - * / modulo expt add1 sub1 <  <= > >= )]) (equal? f i))
                (cond
-                 ([(for/and ( [i args]) (numV? (interp i ds)))
+                 [(for/and ( [i args]) (numV? (interp i ds)))
                    (cond 
-                       [(and (equal?(length 1) args) (or (equal? f add1) (equal? f sub1)))
+                       [(and (equal?(length args) 1) (or (equal? f add1) (equal? f sub1)))
                         (numV (apply f (numV-n (interp (car args) ds)))) ]
-                       []
-                       [])]
+
+                       [(and (equal? (length args) 2)(equal? f modulo) (equal? f expt))
+                        (numV (apply f (numV-n (interp (args) ds))))]
+
+                       [else
+                        (cond
+                          [(or (equal? f +) (equal? f -) (equal? f *) (equal? f /) )
+                           (numV (apply f (for/list ([i args]) (numV-n (interp i ds)))))]
+                          [else  (boolV (apply f (for/list ([i args]) (numV-n (interp i ds)))))])
+                        ]
+                        
+                       )]
                   [else (error "Alguno de los argumentos no es un número")]
-                  ))]
+                  )]
               [ (equal? f equal?)
                  (if (equal? (length args) 2)
                    (boolV (apply f ( list (interp (first args) ds) (interp (second args) ds))))

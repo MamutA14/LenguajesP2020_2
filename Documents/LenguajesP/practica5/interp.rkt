@@ -33,7 +33,7 @@
                 (interp else ds))
              (error "Error la condicional no puede ser evaluada ")))]
     [op (f args)
-        (if ((lambda (l) (for/or  ([i (list + - * / modulo expt add1 sub1 <  <=  > >= equal?  zero?)])(equal? l i )))f)
+        (if ((lambda (l) (for/or  ([i (list + - * / modulo expt add1 sub1 <  <=  > >= equal?  zero? not)])(equal? l i )))f)
             ;;Condición para procedures
             (cond
               [(for/or ([i (list + - * / modulo expt add1 sub1 <  <= > >= )]) (equal? f i))
@@ -54,9 +54,10 @@
                         ]
                         
                        )]
-                  [else (error "Alguno de los argumentos no es un número")]
-                  )]
-              [ (equal? f equal?)
+                 [else (error "Alguno de los argumentos no es un número")])
+               ]
+                 
+              [(equal? f equal?)
                  (if (equal? (length args) 2)
                    (boolV (apply f ( list (interp (first args) ds) (interp (second args) ds))))
                     (error "Se requieren 2 elementos para ="))]
@@ -67,14 +68,34 @@
                               (boolV (f (car args)))
                               (error "Error se espera un número"))
                    (error "Se requiere un elemento para zero?"))
-               ])
-            ;;Condición para no procedures
-            (cond
-              [(for/and ([j args]) (boolV? (interp j ds)))
-               (boolV (f ((lambda(l)
-                 (for/list ([bol l]) ( boolV-b  (interp bol ds) ) )) args)))]
-              [else (error "Alguno de los argumentos no es un booleano")])
-            )]
+               ]
+              [(equal? f not)
+               (if (equal? (length args)1)
+                   (let ([arg (interp (car args) ds)])
+                     (if (boolV? arg)
+                         (boolV (f (boolV-b arg)))
+                         (error "El argumento no es un booleano"))  
+                     )
+                   (error "Se espera un único elemento al usar not"))]
+              )
+            ;;Condición para no procedures (and, or)
+                (cond
+                  [(for/and ([j args]) (boolV? (interp j ds)))
+                   (boolV (f ((lambda(l)
+                                (for/list ([bol l]) ( boolV-b  (interp bol ds) ) )) args)))]
+                  [else (error "Alguno de los argumentos no es un booleano")]))   
+
+            ]
     [fun  (params body) (closure  params  body  ds)]
-    [app (fun args) (error "Sin declararse")]
+    [app (fun args)
+         (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
     ))
+
+;;Función auxiliar que me insertara nuevos valores al ambiente
+;; newAnv:  DefrdSub ->listof symbol -> listof CFWAE -> DefrdSub
+(define (newEnv ds params args)
+  (if (and (empty? params) (empty? args))
+      ds
+      (if (equal? (length params) (length args))
+          (newEnv (aSub (car params) (car args) ds) (cdr params) (cdr args))
+          (error "No hay una relación biyectiva entre params y args"))))

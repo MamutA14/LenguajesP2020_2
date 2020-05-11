@@ -25,7 +25,13 @@
     [id (i) (interp (lookup i ds) ds )]
     [num (n) (numV n)]
     [bool (b) (boolV b)]
-    [iF (condicion then else) (error "Sin declararse")]
+    [iF (condicion then else)
+        (let ([contion (interp condicion ds) ])
+          (if (boolV? contion)
+            (if (boolV-b  contion)
+                (interp then ds)
+                (interp else ds))
+             (error "Error la condicional no puede ser evaluada ")))]
     [op (f args)
         (if ((lambda (l) (for/or  ([i (list + - * / modulo expt add1 sub1 <  <=  > >= equal?  zero?)])(equal? l i )))f)
             ;;Condición para procedures
@@ -35,7 +41,7 @@
                  [(for/and ( [i args]) (numV? (interp i ds)))
                    (cond 
                        [(and (equal?(length args) 1) (or (equal? f add1) (equal? f sub1)))
-                        (numV (apply f (numV-n (interp (car args) ds)))) ]
+                        (numV (f (numV-n (interp (car args) ds)))) ]
 
                        [(and (equal? (length args) 2)(equal? f modulo) (equal? f expt))
                         (numV (apply f (numV-n (interp (args) ds))))]
@@ -69,6 +75,6 @@
                  (for/list ([bol l]) ( boolV-b  (interp bol ds) ) )) args)))]
               [else (error "Alguno de los argumentos no es un booleano")])
             )]
-    [fun  (params body) (error "Sin declararse")]
+    [fun  (params body) (closure  params  body  ds)]
     [app (fun args) (error "Sin declararse")]
     ))

@@ -1,0 +1,1 @@
+("7.6" racket ("3d10385d61b08682b3cbe07d23e990957a29a64b" . "319c9ea362e4daf6dce0d3a6612402fa4806afc5") #"/home/nemo/Documents/LenguajesP/practica5/./grammars.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"plai" #"lang" #"reader.rkt") (collects #"plai" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

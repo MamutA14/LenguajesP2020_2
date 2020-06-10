@@ -31,65 +31,27 @@
             (if (boolV-b  contion)
                 (interp then ds)
                 (interp else ds))
-             (error "Error la condicional no puede ser evaluada ")))]
+             (error 'interp "Error la condicional no puede ser evaluada ")))]
     [op (f args)
-        (if ((lambda (l) (for/or  ([i (list + - * / modulo expt add1 sub1 <  <=  > >= equal?  zero? not)])(equal? l i )))f)
-            ;;Condición para procedures
-            (cond
-              [(for/or ([i (list + - * / modulo expt add1 sub1 <  <= > >= )]) (equal? f i))
-               (cond
-                 [(for/and ( [i args]) (numV? (interp i ds)))
-                   (cond 
-                       [(and (equal?(length args) 1) (or (equal? f add1) (equal? f sub1)))
-                        (numV (f (numV-n (interp (car args) ds)))) ]
-
-                       [(and (equal? (length args) 2)(equal? f modulo) (equal? f expt))
-                        (numV (apply f (numV-n (interp (args) ds))))]
-
-                       [else
-                        (cond
-                          [(or (equal? f +) (equal? f -) (equal? f *) (equal? f /) )
-                           (numV (apply f (for/list ([i args]) (numV-n (interp i ds)))))]
-                          [else  (boolV (apply f (for/list ([i args]) (numV-n (interp i ds)))))])
-                        ]
-                        
-                       )]
-                 [else (error "Alguno de los argumentos no es un número")])
-               ]
-                 
-              [(equal? f equal?)
-                 (if (equal? (length args) 2)
-                   (boolV (apply f ( list (interp (first args) ds) (interp (second args) ds))))
-                    (error "Se requieren 2 elementos para ="))]
-
-              [(equal? f zero?)
-               (if (equal? (length args) 1)
-                   (if (numV? (interp (car args) ds))
-                              (boolV (f (car args)))
-                              (error "Error se espera un número"))
-                   (error "Se requiere un elemento para zero?"))
-               ]
-              [(equal? f not)
-               (if (equal? (length args)1)
-                   (let ([arg (interp (car args) ds)])
-                     (if (boolV? arg)
-                         (boolV (f (boolV-b arg)))
-                         (error "El argumento no es un booleano"))  
-                     )
-                   (error "Se espera un único elemento al usar not"))]
-              )
-            ;;Condición para no procedures (and, or)
-                (cond
-                  [(for/and ([j args]) (boolV? (interp j ds)))
-                   (boolV (f ((lambda(l)
-                                (for/list ([bol l]) ( boolV-b  (interp bol ds) ) )) args)))]
-                  [else (error "Alguno de los argumentos no es un booleano")]))   
-
-            ]
+        (cond
+            [(or (equal? f myAnd) (equal? f myOr))
+                (if (for/and ([i args]) (bool? i))
+                    (boolV (f (map (lambda (x) (cond [(numV? x) (numV-n x)] [(boolV? x) (boolV-b x)] )) (for/list ([i args]) (interp i ds)))))
+                    (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos de tipo boolean" f) )]
+            [(not (procedure-arity-includes? f (length args))) (error 'interp "Error de aridad al aplicar ~a" f)]
+            [(equal? f not)
+                (if (bool? (car args)) (apply f (boolV-b (interp (car args) (mtSub))))
+                    (error 'interp "Type error: la funcion not debe aplicarse con un boolean"))]
+            [(equal? f zero?)
+                (if (num? (car args)) (f (numV-n (interp (car args) (mtSub))))
+                                    (error 'interp "Type error: la funcion zero? debe aplicarse con un number")) ]
+            [else
+                (if (for/and ([i args]) (num? i))
+                    (numV (apply f (map (lambda (x) (cond [(numV? x) (numV-n x)] [(boolV? x) (boolV-b x)] )) (for/list ([i args]) (interp i ds)))))
+                    (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos del tipo number" f) )]  )]
     [fun  (params body) (closure  params  body  ds)]
     [app (fun args)
-         (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
-    ))
+         (interp (fun-body fun) (newEnv ds (fun-params fun) args))] ))
 
 ;;Función auxiliar que me insertara nuevos valores al ambiente
 ;; newAnv:  DefrdSub ->listof symbol -> listof CFWAE -> DefrdSub
@@ -98,4 +60,4 @@
       ds
       (if (equal? (length params) (length args))
           (newEnv (aSub (car params) (car args) ds) (cdr params) (cdr args))
-          (error "No hay una relación biyectiva entre params y args"))))
+          (error 'newEnv "No hay una relación biyectiva entre params y args"))))

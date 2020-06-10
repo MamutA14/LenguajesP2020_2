@@ -34,7 +34,7 @@
               (iF (desugar (condition-test-expr cond0))
                   (desugar (condition-then-expr cond0))
                   (if (empty? condtl)
-                      (error "Error de sintaxis: No existe caso de término en el condicional")
+                      (error 'desugar "Error de sintaxis: No existe caso de término en el condicional")
                       (desugar (condS condtl)))
               )]
              ))]))
@@ -49,4 +49,4 @@
                     (cond
                       [(empty? binds) body]
                       [else (withS (list (car binds)) (withappends (withS* (cdr binds) body)))]))]
-    [else  error "Error: withappends no recibo un withS*"]))
+    [else  error 'withappends "Error: withappends no recibo un withS*"]))

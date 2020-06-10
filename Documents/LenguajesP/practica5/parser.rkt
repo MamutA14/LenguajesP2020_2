@@ -48,8 +48,8 @@
                            (case (first i) 
                              [(else) (else-cond (parse (second i)))]
                              [else (condition (parse (first i)) (parse (second i))) ])
-                           (error "Error de sintaxis: Aridad incorrecta de algún argumento"))))
-                     (error "Error de sintaxis: No puede existir otra condición despues del else"))]
+                           (error 'parse "Error de sintaxis: Aridad incorrecta de algún argumento"))))
+                     (error 'parse "Error de sintaxis: No puede existir otra condición despues del else"))]
            
                 [(iF) (let ([sexp0 (cdr sexp)])
                           (if (equal? 3 (length sexp0))
@@ -110,6 +110,7 @@
                  (accuelse (cdr sexp)))]
             [else (accuelse (cdr sexp))]
             )]))
+
 
 
 

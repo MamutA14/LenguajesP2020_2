@@ -27,7 +27,7 @@
                 [(<=)  (opS <=  (map parse (cdr sexp)))]
                 [(>)  (opS >  (map parse (cdr sexp)))]
                 [(>=)  (opS >=  (map parse (cdr sexp)))]
-                [(=) (opS equal? (map parse (cdr sexp)) )]
+                [(=) (opS = (map parse (cdr sexp)) )]
                 [(not)  (opS not  (map parse (cdr sexp)) )]
                 [(and)  (opS myAnd (map parse (cdr sexp)))];;"and" y "or" no son procedures por ende se declaro de está manera
                 [(or)  (opS myOr (map parse (cdr sexp)))]

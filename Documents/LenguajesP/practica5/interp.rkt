@@ -35,9 +35,10 @@
     [op (f args)
         (cond
             [(or (equal? f myAnd) (equal? f myOr))
-                (if (for/and ([i args]) (bool? i))
-                    (boolV (f (map (lambda (x) (cond [(numV? x) (numV-n x)] [(boolV? x) (boolV-b x)] )) (for/list ([i args]) (interp i ds)))))
-                    (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos de tipo boolean" f) )]
+                (let ([intpArgs (for/list ([i args]) (interp i ds))])
+                    (if (for/and ([i intpArgs]) (boolV? i))
+                        (boolV (f (map (lambda (x) (boolV-b x)) intpArgs)))
+                        (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos de tipo boolean" f)))]
             [(not (procedure-arity-includes? f (length args))) (error 'interp "Error de aridad al aplicar ~a" f)]
             [(equal? f not)
                 (if (bool? (car args)) (apply f (boolV-b (interp (car args) (mtSub))))
@@ -48,7 +49,7 @@
             [else
                 (let ([intArgs (for/list ([i args]) (interp i ds))])
                     (if (for/and ([i intArgs]) (numV? i))
-                        (numV (apply f (map (lambda (x) (numV-n x)) intArgs )))
+                        (formatValue (apply f (map (lambda (x) (numV-n x)) intArgs )))
                         (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos del tipo number" f))  )]  )]
     [fun  (params body) (closure  params  body  ds)]
     [app (fun args)
@@ -64,7 +65,17 @@
           (error 'newEnv "No hay una relación biyectiva entre params y args"))))
 
 
+;;Funcion que toma un CFWBAE-Value y lo transforma en un analogo de tipo CFWBAE
+;;fromCFValueToCFWB: CFWBAE-Value -> CFWBAE
 (define (fromCFValueToCFWB x)
     (cond
         [(numV? x) (num (numV-n x))]
-        [(boolV? x) (bool (boolV-b x))]))
+         [(boolV? x) (bool (boolV-b x))]))
+
+
+;;Funcion que toma un valor numerico o booleano y lo transforma en un analogo de tipo CFWBAE-Value
+;;formatValue: number + boolean -> CFWBAE-Value
+(define (formatValue x)
+    (cond
+        [(number? x) (numV x)]
+        [(boolean? x)  (boolV x)]))

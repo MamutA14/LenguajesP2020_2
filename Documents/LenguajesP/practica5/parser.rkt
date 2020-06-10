@@ -54,16 +54,16 @@
                 [(if) (let ([sexp0 (cdr sexp)])
                           (if (equal? 3 (length sexp0))
                                 (iFS  (parse  (first sexp0)) (parse  (second sexp0)) (parse  (third sexp0)))
-                                (error "Error de sintaxis: Aridad incorrecta para funcion iFS")))]
+                                (error 'parse "Error de sintaxis: Aridad incorrecta para funcion iFS")))]
                 [ (with)
                             (let ([sexp0 (cdr sexp)])
                                       (if (equal? (length sexp0) 2)
                                        (withS (for/list ([ j (first sexp0)])
                                                  (cond
                                                    [(and (equal? 2 (length j)) (symbol? (car j))) (binding (first j) (parse (second j))) ]
-                                                   [else (error "Error de sintaxis: Asignacion de valores no valida en withS.")] ))
+                                                   [else (error 'parse "Error de sintaxis: Asignacion de valores no valida en withS.")] ))
                                                    (parse (second sexp0))) 
-                                       (error "Error de sintaxis: Aridad incorrecta  en withS")))]
+                                       (error 'parse "Error de sintaxis: Aridad incorrecta  en withS")))]
 
                [ (with*)
                              (let ([sexp0 (cdr sexp)])
@@ -71,20 +71,18 @@
                                        (withS* (for/list ([ j (first sexp0)])
                                                  (cond
                                                    [(and (equal? 2 (length j)) (symbol? (car j))) (binding (first j) (parse (second j))) ]
-                                                   [else (error "Error de sintaxis: Asignacion de valores no valida en withS*.")] ))
+                                                   [else (error 'parse "Error de sintaxis: Asignacion de valores no valida en withS*.")] ))
                                                    (parse (second sexp0))) 
-                                       (error "Error de sintaxis: Aridad incorrecta  en withS*")))
+                                       (error 'parse "Error de sintaxis: Aridad incorrecta  en withS*")))
                              ]
               [(fun)
                (let ([sexp0 (cdr sexp)])
                         (if (equal? (length sexp0) 2)
                           (funS (for/list ([l (first sexp0)])
                                 (if (symbol? l) l
-                                (error "Error de sintaxis: Error al definir la lista de ids en funS")))
+                                (error 'parse "Error de sintaxis: Error al definir la lista de ids en funS")))
                              (parse (second sexp0)))
-                        (error "Error de sintaxis: Aridad incorrecta  en funS*"))  
-                          )
-                        ]
+                        (error 'parse "Error de sintaxis: Aridad incorrecta  en funS*")) ) ]
 
            [(app)
             (let ([sexp0 (cdr sexp)])
@@ -93,9 +91,11 @@
                            (for/list ([j (second sexp0)]) (parse j)))
                  (error "Error de sintaxis: Aridad incorrecta  en appS* ó Asignación de valores no válida")))
               ]
-           [else (error "Error de verificación: Procedure no declarado")])  
-       ]
-       [else  (error "Error de verificación: Procedure no declarado")] ))
+           [else
+                (if (= (length sexp) 2)
+                    (appS (parse (first sexp)) (for/list ([j (second sexp)]) (parse j)))
+                (error "Error de verificación: Procedure no declarado"))])  ]
+       [else  (error "Error de verificación: s-expresion no valida")]  ))
 
 ;;Función que servira para verificar que haya en cond
 ;;un solo else y además sea la última condición
@@ -110,7 +110,4 @@
                  (accuelse (cdr sexp)))]
             [else (accuelse (cdr sexp))]
             )]))
-
-
-
 

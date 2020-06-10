@@ -44,11 +44,12 @@
                     (error 'interp "Type error: la funcion not debe aplicarse con un boolean"))]
             [(equal? f zero?)
                 (if (num? (car args)) (f (numV-n (interp (car args) (mtSub))))
-                                    (error 'interp "Type error: la funcion zero? debe aplicarse con un number")) ]
+                    (error 'interp "Type error: la funcion zero? debe aplicarse con un number")) ]
             [else
-                (if (for/and ([i args]) (num? i))
-                    (numV (apply f (map (lambda (x) (cond [(numV? x) (numV-n x)] [(boolV? x) (boolV-b x)] )) (for/list ([i args]) (interp i ds)))))
-                    (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos del tipo number" f) )]  )]
+                (let ([intArgs (for/list ([i args]) (interp i ds))])
+                    (if (for/and ([i intArgs]) (numV? i))
+                        (numV (apply f (map (lambda (x) (numV-n x)) intArgs )))
+                        (error 'interp "Type error: la funcion ~a debe aplicarse con argumentos del tipo number" f))  )]  )]
     [fun  (params body) (closure  params  body  ds)]
     [app (fun args)
          (interp (fun-body fun) (newEnv ds (fun-params fun) args))] ))
@@ -59,5 +60,11 @@
   (if (and (empty? params) (empty? args))
       ds
       (if (equal? (length params) (length args))
-          (newEnv (aSub (car params) (car args) ds) (cdr params) (cdr args))
+              (newEnv (aSub (car params) (fromCFValueToCFWB (interp (car args) ds)) ds) (cdr params) (cdr args))
           (error 'newEnv "No hay una relación biyectiva entre params y args"))))
+
+
+(define (fromCFValueToCFWB x)
+    (cond
+        [(numV? x) (num (numV-n x))]
+        [(boolV? x) (bool (boolV-b x))]))

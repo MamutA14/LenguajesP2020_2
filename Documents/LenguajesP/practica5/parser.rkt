@@ -84,13 +84,6 @@
                              (parse (second sexp0)))
                         (error 'parse "Error de sintaxis: Aridad incorrecta  en funS*")) ) ]
 
-           [(app)
-            (let ([sexp0 (cdr sexp)])
-              (if (and (equal? (length sexp0) 2) (list? (second sexp0)))
-                  (appS (parse (first sexp0))
-                           (for/list ([j (second sexp0)]) (parse j)))
-                 (error "Error de sintaxis: Aridad incorrecta  en appS* ó Asignación de valores no válida")))
-              ]
            [else
                 (if (= (length sexp) 2)
                     (appS (parse (first sexp)) (for/list ([j (second sexp)]) (parse j)))
@@ -108,6 +101,5 @@
              (if (not (empty? (cdr sexp)))
                  #f
                  (accuelse (cdr sexp)))]
-            [else (accuelse (cdr sexp))]
-            )]))
+            [else (accuelse (cdr sexp))] )]))
 

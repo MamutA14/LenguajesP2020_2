@@ -29,18 +29,9 @@
                 [(>=)  (opS >=  (map parse (cdr sexp)))]
                 [(=) (opS equal? (map parse (cdr sexp)) )]
                 [(not)  (opS not  (map parse (cdr sexp)) )]
-                [(and)  (opS (let ([and ( lambda (l)
-                                          (cond
-                                             [(list? l) (andmap (lambda(x) (and x)) l)]
-                                             [else (and l)]))])
-                                                    and)  (map parse (cdr sexp)))];;"and" y "or" no son procedures por ende se declaro de está manera
-                [(or)  (opS (let ([or ( lambda (l)
-                                          (cond
-                                             [(list? l) (ormap (lambda(x) (or x )) l)]
-                                             [else (or l)]))])
-                                                    or)  (map parse (cdr sexp)))]
+                [(and)  (opS myAnd (map parse (cdr sexp)))];;"and" y "or" no son procedures por ende se declaro de está manera
+                [(or)  (opS myOr (map parse (cdr sexp)))]
                 [(zero?)  (opS zero?  (map parse (cdr sexp)))]
-
                 [(cond)
                  (if (accuelse (cdr sexp))
                      (condS (for/list ([i (cdr sexp)])
@@ -103,3 +94,18 @@
                  (accuelse (cdr sexp)))]
             [else (accuelse (cdr sexp))] )]))
 
+
+;;Funcion que regresa el and de los elementos de una lista
+;;list(boolan) -> boolean
+(define (myAnd l)
+         (cond
+            [(list? l) (andmap (lambda(x) (and x)) l)]
+            [else (and l)]))
+
+
+;;Funcion que regresa el or de los elementos de una lista
+;;list(boolan) -> boolean
+(define (myOr l)
+            (cond
+                [(list? l) (ormap (lambda(x) (or x )) l)]
+                [else (or l)] ))

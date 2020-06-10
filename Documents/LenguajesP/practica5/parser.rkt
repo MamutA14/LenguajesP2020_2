@@ -51,7 +51,7 @@
                            (error 'parse "Error de sintaxis: Aridad incorrecta de algún argumento"))))
                      (error 'parse "Error de sintaxis: No puede existir otra condición despues del else"))]
            
-                [(iF) (let ([sexp0 (cdr sexp)])
+                [(if) (let ([sexp0 (cdr sexp)])
                           (if (equal? 3 (length sexp0))
                                 (iFS  (parse  (first sexp0)) (parse  (second sexp0)) (parse  (third sexp0)))
                                 (error "Error de sintaxis: Aridad incorrecta para funcion iFS")))]

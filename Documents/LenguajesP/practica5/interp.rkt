@@ -55,14 +55,13 @@
     [app (fun args)
          (interp (fun-body fun) (newEnv ds (fun-params fun) args))] ))
 
+
 ;;Función auxiliar que me insertara nuevos valores al ambiente
-;; newAnv:  DefrdSub ->listof symbol -> listof CFWAE -> DefrdSub
+;; newAnv:  DefrdSub -> listof symbol -> listof CFWAE -> DefrdSub
 (define (newEnv ds params args)
-  (if (and (empty? params) (empty? args))
-      ds
-      (if (equal? (length params) (length args))
-              (newEnv (aSub (car params) (fromCFValueToCFWB (interp (car args) ds)) ds) (cdr params) (cdr args))
-          (error 'newEnv "No hay una relación biyectiva entre params y args"))))
+    (for/fold ([acc ds])
+              ([i params] [j args])
+              (aSub i (fromCFValueToCFWB (interp j ds)) acc) ))
 
 
 ;;Funcion que toma un CFWBAE-Value y lo transforma en un analogo de tipo CFWBAE

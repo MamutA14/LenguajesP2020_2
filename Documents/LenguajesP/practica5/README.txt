@@ -4,8 +4,8 @@ Sierra Casiano Vladimir     316020361           vladimirsierra@ciencias.unam.mx
 
 
 
-Observacio: en la sintaxis abstracta el simbolo = representa el procedure homónimo en Racket. No confundir
-            con 'equal?', la funcion '=' solo compara argumentos de tipo number.
+Observación: en la sintaxis abstracta el simbolo = representa el procedure homónimo en Racket. No confundir
+             con 'equal?', la funcion '=' solo compara argumentos de tipo number.
 
 
 

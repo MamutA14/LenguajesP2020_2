@@ -1,10 +1,10 @@
-Nombre:			            Num de cuenta: 		correo:
-Acosta Meza Alam 	        315124569		    alam@ciencias.unam.mx
-Sierra Casiano Vladimir     316020361		    vladimirsierra@ciencias.unam.mx
+Nombre:                     Num de cuenta:      correo:
+Acosta Meza Alam            315124569           alam@ciencias.unam.mx
+Sierra Casiano Vladimir     316020361           vladimirsierra@ciencias.unam.mx
 
 
 
-Observaciones: en la sintaxis abstracta el simbolo = representa el procedure homónimo en Racket. No confundir
+Observacio: en la sintaxis abstracta el simbolo = representa el procedure homónimo en Racket. No confundir
             con 'equal?', la funcion '=' solo compara argumentos de tipo number.
 
 

@@ -7,7 +7,51 @@
 ;; typeof CFWBAE -> Type-Context -> Type
 ;; (define (typeof expr context)
 (define (typeof expr context)
-  ...)
+  (type-case SCFWBAE expr
+      [idS (i) (lookupType exp context)]
+      [numS (n) (numberT)]
+      [boolS (b) (booleanT)]
+      [iFS (condition thenE elseE)
+          (let ([conditionType (typeof condition context) ])
+                (if (booleanT? conditionType)
+                    (let ([typeThen (typeof thenE context)] [typeElse (typeof elseE context)])
+                        (if (equal? typeThen typeElse)
+                            typeThen
+                            (error 'typeof "Los tipos de retorno en ~a son distintos" expr)))
+                (error 'typeof "Error en la condicion ~a , no es de tipo boolean" condition)))]
+      [opS (f args)
+          (cond
+            [(member f (list + - * / modulo expt add1 sub1))
+                (if (for/and ([i args]) (numberT? (typeof i context)))
+                    (numberT)
+                    (error 'typeof "Los argumentos para ~a deben son de tipo number" f))]
+            [(member f (list = < <= > >= zero?))
+               (if (for/and ([i args]) (numberT? (typeof i context)))
+                    (booleanT)
+                    (error 'typeof "Los argumentos para ~a deben son de tipo number" f))]
+            [(member f (list not myAnd myOr))
+               (if (for/and ([i args]) (booleanT? (typeof i context)))
+                    (booleanT)
+                    (error 'typeof "Los argumentos para ~a deben son de tipo boolean" f))]
+            )]
+
+      ;[condS]
+      ;[withS]
+      ;[withS*]
+      ;[funS  (params body x) (closure  params  body  ds)]
+      ;[appS (fun args)
+       ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
+      [else 1]))
   
 (define (prueba exp)
   (typeof (parse exp) (phi)))
+
+
+;;Funcion para buscar tipos en un contexto
+;; lookupType: symbol -> Type-Context -> Type
+(define (lookupType name ds)
+  (type-case Type-Context ds
+    [phi () (error 'lookupType "Hay un identificador sin tipo definido: ~a" name)]
+    [gamma (nameT val dss)
+      (if (equal? name nameT) val
+          (lookupType name dss))]))

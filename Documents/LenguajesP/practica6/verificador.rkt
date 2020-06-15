@@ -35,7 +35,11 @@
                     (error 'typeof "Los argumentos para ~a deben son de tipo boolean" f))]
             )]
 
-      ;[condS]
+            [condS (cases)
+             (let ([rtype (condType (car cases) context)])
+               (if (for/and([i (cdr cases)]) (equal? rtype (condType i context)))
+                   rtype
+                   (error 'typeof "Los tipos de retorno en ~a son distintos" expr)))]
       ;[withS]
       ;[withS*]
       ;[funS  (params body x) (closure  params  body  ds)]
@@ -55,3 +59,16 @@
     [gamma (nameT val dss)
       (if (equal? name nameT) val
           (lookupType name dss))]))
+
+
+;;Funcion que me extraera el tipo de una conditional
+;; condType: condition -> Type-Context -> Type 
+(define (condType c context)
+  (type-case Condition c
+     [condition (test-expr then-expr)
+                (if (booleanT? (typeof  (condition-test-expr c) context))
+                   (typeof  (condition-then-expr c) context)
+                   (error 'condition "El test-expr debe de ser tipo booleanT"))
+                 ]
+  [else-cond  (else-expr)
+              (typeof (else-cond-else-expr c) context)]))

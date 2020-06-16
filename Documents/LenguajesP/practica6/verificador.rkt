@@ -42,7 +42,12 @@
                    (error 'typeof "Los tipos de retorno en ~a son distintos" expr)))]
       ;[withS]
       ;[withS*]
-      ;[funS  (params body x) (closure  params  body  ds)]
+      [funS (params rType body)
+             (let ([typep (for/list ([i params]) (param-tipo i))])
+               (begin
+                 (set! context (newContext params context)) ;;Tambien hubiera funcionado creo que con for/fold pero no se manejarlo 
+                  (funT (append typep (list rType)))
+                 ))]
       ;[appS (fun args)
        ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
       [else 1]))

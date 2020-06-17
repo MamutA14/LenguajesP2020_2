@@ -56,7 +56,7 @@
                     [typeBody (typeof body newContext)])
                     (if (equal? rType typeBody)
                         (funT (append typep (list rType)))
-                        (error 'typeof (format "El tipo de retorno declarado para la funcion es ~a, pero el del body es ~b" rType typeBody)))
+                        (error 'typeof (string-append "El tipo de retorno declarado para la funcion es "  (~a rType) " pero el del body es " (~a typeBody))))
                )]
       ;[appS (fun args)
        ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]

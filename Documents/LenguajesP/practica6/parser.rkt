@@ -70,13 +70,13 @@
 
               [(fun)
                     (let ([sexp0 (cdr sexp)])
-                        (if (equal? (length sexp0) 3)
+                        (if (equal? (length sexp0) 4)
                             (funS (for/list ([i (first sexp0)])
                                 (if (and (symbol? (first i)) (equal? ': (second i)))
                                     (param (first i) (findType (third i)))
                                 (error 'parse "Error de sintaxis: Error al definir la lista de ids en funS")))
-                            (findType (second sexp0))
-                            (parse (third sexp0)))
+                            (findType (third sexp0))
+                            (parse (fourth sexp0)))
                         (error 'parse "Error de sintaxis: Aridad incorrecta  en funS")) ) ]
 
            [else

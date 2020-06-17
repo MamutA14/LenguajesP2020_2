@@ -45,8 +45,30 @@
                     )
                     rtype
                    (error 'typeof "Los tipos de retorno en ~a son distintos" expr)))]
-      ;[withS]
-      ;[withS*]
+      [withS (bdins body)
+            (let* ([ids (for/list ([i bdins]) (binding-id i))]
+                    [types (for/list ([i bdins]) (binding-tipo i))]
+                    [values (for/list ([i bdins]) (binding-value i))]
+                    [newContext (for/fold
+                                ([cum context])
+                                ([i ids] [j types] [val values])
+                                (if (equal? j (typeof val cum))
+                                    (gamma i j cum)
+                                    (error 'typeof (string-append "El id " (~a i) " tiene declarado tipo " (~a j)
+                                                        " pero su value es de tipo " (~a (typeof val cum))))) )])
+                    (typeof body newContext) )]
+      [withS* (bdins body)
+                  (let* ([ids (for/list ([i bdins]) (binding-id i))]
+                          [types (for/list ([i bdins]) (binding-tipo i))]
+                          [values (for/list ([i bdins]) (binding-value i))]
+                          [newContext (for/fold
+                                      ([cum context])
+                                      ([i ids] [j types] [val values])
+                                      (if (equal? j (typeof val cum))
+                                          (gamma i j cum)
+                                          (error 'typeof (string-append "El id " (~a i) " tiene declarado tipo " (~a j)
+                                                              " pero su value es de tipo " (~a (typeof val cum))))) )])
+                          (typeof body newContext) )]
       [funS (params rType body)
              (let* ([typep (for/list ([i params]) (param-tipo i))]
                     [ids (for/list ([j params]) (param-param j))]
@@ -56,8 +78,7 @@
                     [typeBody (typeof body newContext)])
                     (if (equal? rType typeBody)
                         (funT (append typep (list rType)))
-                        (error 'typeof (string-append "El tipo de retorno declarado para la funcion es "  (~a rType) " pero el del body es " (~a typeBody))))
-               )]
+                        (error 'typeof (string-append "El tipo de retorno declarado para la funcion es "  (~a rType) " pero el del body es " (~a typeBody)))) )]
       ;[appS (fun args)
        ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
       [else 1]))

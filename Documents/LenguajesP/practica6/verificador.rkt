@@ -24,15 +24,15 @@
             [(member f (list + - * / modulo expt add1 sub1))
                 (if (for/and ([i args]) (numberT? (typeof i context)))
                     (numberT)
-                    (error 'typeof "Los argumentos para ~a deben son de tipo number" f))]
+                    (error 'typeof "Los argumentos para ~a deben ser de tipo number" f))]
             [(member f (list = < <= > >= zero?))
                (if (for/and ([i args]) (numberT? (typeof i context)))
                     (booleanT)
-                    (error 'typeof "Los argumentos para ~a deben son de tipo number" f))]
+                    (error 'typeof "Los argumentos para ~a deben ser de tipo number" f))]
             [(member f (list not myAnd myOr))
                (if (for/and ([i args]) (booleanT? (typeof i context)))
                     (booleanT)
-                    (error 'typeof "Los argumentos para ~a deben son de tipo boolean" f))]
+                    (error 'typeof "Los argumentos para ~a deben ser de tipo boolean" f))]
             )]
 
       [condS (cases)
@@ -79,9 +79,12 @@
                     (if (equal? rType typeBody)
                         (funT (append typep (list rType)))
                         (error 'typeof (string-append "El tipo de retorno declarado para la funcion es "  (~a rType) " pero el del body es " (~a typeBody)))) )]
-      ;[appS (fun args)
-       ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
-      [else 1]))
+      [appS (fun args)
+            (let* ([funType (if (funT? (typeof fun context)) (typeof fun context) (error "La funcion ~a no es de tipo funT" fun))]
+                    [argsTypes (for/list ([i args]) (typeof i context))] )
+                    (if (for/and ([i (funT-params funType)] [j argsTypes]) (equal? i j))
+                        (last (funT-params funType))
+                        (error 'typeof (string-append "Los tipos de los parametros de " (~a fun) " difieren con los de " (~a args)))) )]  ))
   
 (define (prueba exp)
   (typeof (parse exp) (phi)))

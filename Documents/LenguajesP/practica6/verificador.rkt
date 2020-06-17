@@ -8,7 +8,7 @@
 ;; (define (typeof expr context)
 (define (typeof expr context)
   (type-case SCFWBAE expr
-      [idS (i) (lookupType exp context)]
+      [idS (i) (lookupType i context)]
       [numS (n) (numberT)]
       [boolS (b) (booleanT)]
       [iFS (condition thenE elseE)
@@ -35,19 +35,29 @@
                     (error 'typeof "Los argumentos para ~a deben son de tipo boolean" f))]
             )]
 
-            [condS (cases)
-             (let ([rtype (condType (car cases) context)])
-               (if (for/and([i (cdr cases)]) (equal? rtype (condType i context)))
-                   rtype
+      [condS (cases)
+            (let ([rtype (condType (car cases) context)])
+                (if (and
+                        (for/and ([i (cdr cases)]) (equal? rtype (condType i context)))
+                        (for/and ([i cases]) ((lambda (x) (type-case Condition x
+                            [condition (cnd-e then-e) (equal? (booleanT) (typeof cnd-e context))]
+                            [else-cond (else-e) #t]) ) i) )
+                    )
+                    rtype
                    (error 'typeof "Los tipos de retorno en ~a son distintos" expr)))]
       ;[withS]
       ;[withS*]
       [funS (params rType body)
-             (let ([typep (for/list ([i params]) (param-tipo i))])
-               (begin
-                 (set! context (newContext params context)) ;;Tambien hubiera funcionado creo que con for/fold pero no se manejarlo 
-                  (funT (append typep (list rType)))
-                 ))]
+             (let* ([typep (for/list ([i params]) (param-tipo i))]
+                    [ids (for/list ([j params]) (param-param j))]
+                    [newContext (for/fold ([cum context])
+                                          ([i ids]  [j typep])
+                                          (gamma i j cum))]
+                    [typeBody (typeof body newContext)])
+                    (if (equal? rType typeBody)
+                        (funT (append typep (list rType)))
+                        (error 'typeof (format "El tipo de retorno declarado para la funcion es ~a, pero el del body es ~b" rType typeBody)))
+               )]
       ;[appS (fun args)
        ;    (interp (fun-body fun) (newEnv ds (fun-params fun) args))]
       [else 1]))
